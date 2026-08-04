@@ -9,7 +9,7 @@ from linkedin_cli import logging_utils
 from linkedin_cli.auth import AuthService
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def data_dir(tmp_path, monkeypatch):
     monkeypatch.setattr(config_module, "DATA_DIR", tmp_path)
     monkeypatch.setattr(config_module, "CONFIG_FILE", tmp_path / "config.json")
