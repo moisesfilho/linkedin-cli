@@ -1,0 +1,77 @@
+[project]
+name = "linkedin-cli"
+version = "0.1.0-alpha"
+description = "CLI to publish and manage LinkedIn posts from the terminal"
+requires-python = ">=3.10"
+dependencies = [
+    "click>=8.0.0",
+    "requests>=2.0.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=9.0", "pytest-mock>=3.0", "pytest-cov>=7.0"]
+dev = ["ruff>=0.16", "mypy>=1.0", "bandit>=1.9"]
+
+[project.scripts]
+linkedin = "linkedin_cli.cli:cli"
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.coverage.run]
+omit = ["src/linkedin_cli/__main__.py"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "N",        # pep8-naming
+    "UP",       # pyupgrade
+    "PL",       # pylint
+    "RUF",      # ruff-specific
+    "SIM",      # simplify
+    "T20",      # print statements
+    "PT",       # pytest
+    "BLE",      # blind except
+    "RSE",      # raise semantics
+]
+ignore = [
+    "PLR2004",  # magic value comparisons
+    "SIM115",   # open-file context manager
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["T20", "E501"]
+"src/linkedin_cli/cli.py" = ["PLR0913", "PLR0917"]
+"src/linkedin_cli/i18n.py" = ["E501"]
+"tools/*" = ["PLR0913", "PLR0917", "E501", "T20"]
+
+[tool.ruff.format]
+quote-style = "double"
+line-ending = "auto"
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+exclude = ["tests/"]
+ignore_missing_imports = true
+
+[tool.bandit]
+exclude_dirs = ["tests"]
+# B105 (hardcoded_password_string) is a weak regex-based heuristic that false-positives
+# on i18n message catalogs and the "***" masking display; it is skipped project-wide.
+skips = ["B105"]
