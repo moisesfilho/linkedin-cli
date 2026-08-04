@@ -1,7 +1,6 @@
 __version__ = "0.1.0-alpha"
 
 from .auth import AuthError, AuthService, CredentialsNotFoundError
-from .cli import cli
 from .client import LinkedInClient, LinkedInError
 from .config import Config, load_config, save_config
 from .i18n import t
@@ -18,7 +17,6 @@ __all__ = [
     "MediaAsset",
     "Post",
     "QueuedPost",
-    "cli",
     "load_config",
     "save_config",
     "t",
