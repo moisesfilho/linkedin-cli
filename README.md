@@ -1,10 +1,10 @@
 # linkedin-cli
 
 <p>
-  <img src="https://img.shields.io/badge/version-v0.1.0--alpha-blue" alt="Version">
+  <img src="https://img.shields.io/badge/version-v0.1.1-blue" alt="Version">
   <img src="https://img.shields.io/badge/license-MIT-green" alt="License">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python">
-  <img src="https://img.shields.io/badge/tests-128%20passing-brightgreen" alt="Tests">
+  <img src="https://img.shields.io/badge/tests-159%20passing-brightgreen" alt="Tests">
   <img src="https://img.shields.io/badge/coverage-100%25-brightgreen" alt="Coverage">
 </p>
 
@@ -22,6 +22,7 @@ CLI to publish and manage posts on your personal LinkedIn profile from the termi
 - **OAuth 2.0 authentication** — 3-legged flow with local callback server
 - **Bilingual interface** — messages in English (default) or Portuguese
 - **Cyclic Application Logs** — records every command, keeping only the configured number of days (default 120)
+- **Little-text escaping** — automatically escapes LinkedIn reserved characters, preventing silent truncation by the Posts API
 
 ## Installation
 
@@ -79,6 +80,12 @@ linkedin post create -t "Check this out" -i ./image.png --alt-text "Description 
 # Restrict visibility to connections only
 linkedin post create -t "Hello, network!" --visibility CONNECTIONS
 ```
+
+> The Posts API renders the commentary as *little text*: unescaped reserved
+> characters (`\ | { } @ [ ] ( ) < > # * _ ~`) silently truncate the post. The
+> CLI escapes them automatically and the backslashes are not rendered. Use
+> `--no-escape` only if the text contains none of those characters — the CLI
+> warns you if it does.
 
 ### Show / Delete
 
@@ -150,6 +157,7 @@ linkedin-cli/
 │       ├── cli.py          # CLI interface (click)
 │       ├── client.py       # LinkedIn REST API wrapper (LinkedInClient)
 │       ├── config.py       # Config dataclass + env vars
+│       ├── formatter.py    # Little-text escaping (escape_little_text)
 │       ├── i18n.py         # Message catalogs (en/pt) and t()
 │       ├── logging_utils.py # Cyclic rotating logger (TimedRotatingFileHandler)
 │       └── models.py       # Dataclasses: Post, QueuedPost, MediaAsset, AuthToken
@@ -159,6 +167,7 @@ linkedin-cli/
 │   ├── test_cli.py         # Click CliRunner tests
 │   ├── test_client.py
 │   ├── test_config.py
+│   ├── test_formatter.py
 │   ├── test_i18n.py
 │   ├── test_logging_utils.py
 │   └── test_models.py
@@ -174,7 +183,7 @@ linkedin-cli/
 ## Tests
 
 ```bash
-pytest                    # 128 tests
+pytest                    # 159 tests
 pytest --cov=             # Coverage (100%)
 ```
 

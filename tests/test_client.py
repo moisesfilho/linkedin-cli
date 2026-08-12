@@ -94,6 +94,27 @@ def test_create_post_api_error(client, mocker):
         client.create_post("x")
 
 
+def test_create_post_escapes_reserved(client, mocker):
+    resp = FakeResponse(201, headers={"x-restli-id": "urn:li:share:999"})
+    mocker.patch.object(client._session, "request", return_value=resp)
+
+    post = client.create_post("veja (esta parte)")
+
+    request_kwargs = client._session.request.call_args.kwargs
+    assert request_kwargs["json"]["commentary"] == "veja \\(esta parte\\)"
+    assert post.commentary == "veja \\(esta parte\\)"
+
+
+def test_create_post_skip_escape_reserved(client, mocker):
+    resp = FakeResponse(201, headers={"x-restli-id": "urn:li:share:999"})
+    mocker.patch.object(client._session, "request", return_value=resp)
+
+    client.create_post("veja (esta parte)", escape_reserved=False)
+
+    request_kwargs = client._session.request.call_args.kwargs
+    assert request_kwargs["json"]["commentary"] == "veja (esta parte)"
+
+
 def test_upload_image(client, tmp_path, mocker):
     image = tmp_path / "img.png"
     image.write_bytes(b"\x89PNG")

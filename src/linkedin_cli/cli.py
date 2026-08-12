@@ -5,6 +5,7 @@ import click
 from .auth import AuthError, AuthService, CredentialsNotFoundError
 from .client import LinkedInClient, LinkedInError
 from .config import SUPPORTED_LANGUAGES, load_config, save_config
+from .formatter import escape_little_text
 from .i18n import t
 from .models import VISIBILITIES
 
@@ -78,12 +79,20 @@ def post() -> None:
     show_default=True,
     help="Who can see the post.",
 )
+@click.option(
+    "--no-escape",
+    is_flag=True,
+    default=False,
+    help="Send the text verbatim without escaping LinkedIn reserved characters. "
+    "WARNING: unescaped reserved characters can silently truncate the post.",
+)
 def post_create(
     text: str | None,
     file: TextIO | None,
     image: str | None,
     alt_text: str | None,
     visibility: str,
+    no_escape: bool,
 ) -> None:
     """Create a text or image post."""
     if text and file is not None:
@@ -92,15 +101,26 @@ def post_create(
         text = file.read()
     if not text:
         raise click.ClickException(_msg("post_requires_content"))
+    escaped_count = len(escape_little_text(text)) - len(text)
+    if no_escape and escaped_count:
+        click.echo(_msg("post_no_escape_warning"), err=True)
+    elif escaped_count:
+        click.echo(_msg("post_escape_notice", count=escaped_count), err=True)
     client = LinkedInClient()
     try:
         if image:
             asset = client.upload_image(image)
             post_obj = client.create_post(
-                text, visibility=visibility, image_urn=asset.image_urn, alt_text=alt_text
+                text,
+                visibility=visibility,
+                image_urn=asset.image_urn,
+                alt_text=alt_text,
+                escape_reserved=not no_escape,
             )
         else:
-            post_obj = client.create_post(text, visibility=visibility)
+            post_obj = client.create_post(
+                text, visibility=visibility, escape_reserved=not no_escape
+            )
     except (LinkedInError, AuthError, CredentialsNotFoundError) as exc:
         raise click.ClickException(str(exc))
     click.echo(_msg("post_created", id=post_obj.id))

@@ -7,6 +7,7 @@ import requests as req_lib
 
 from .auth import AuthService
 from .config import load_config
+from .formatter import escape_little_text
 from .i18n import t
 from .models import MediaAsset, Post
 
@@ -47,7 +48,10 @@ class LinkedInClient:
         visibility: str = "PUBLIC",
         image_urn: str | None = None,
         alt_text: str | None = None,
+        escape_reserved: bool = True,
     ) -> Post:
+        if escape_reserved:
+            commentary = escape_little_text(commentary)
         body: dict[str, Any] = {
             "author": self.get_person_urn(),
             "commentary": commentary,

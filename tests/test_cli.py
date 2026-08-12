@@ -178,7 +178,7 @@ def test_post_create_text(data_dir, mocker):
     assert result.exit_code == 0
     assert "Post created: urn:li:share:1" in result.output
     assert "https://www.linkedin.com/feed/update/urn:li:share:1/" in result.output
-    client.create_post.assert_called_once_with("hello", visibility="PUBLIC")
+    client.create_post.assert_called_once_with("hello", visibility="PUBLIC", escape_reserved=True)
 
 
 def test_post_create_from_file(data_dir, tmp_path, mocker):
@@ -191,7 +191,42 @@ def test_post_create_from_file(data_dir, tmp_path, mocker):
 
     assert result.exit_code == 0
     assert "urn:li:share:2" in result.output
-    client.create_post.assert_called_once_with("Markdown **content**", visibility="PUBLIC")
+    client.create_post.assert_called_once_with(
+        "Markdown **content**", visibility="PUBLIC", escape_reserved=True
+    )
+
+
+def test_post_create_no_escape(data_dir, mocker):
+    client = mocker.patch("linkedin_cli.cli.LinkedInClient").return_value
+    client.create_post.return_value = Post(id="urn:li:share:4", commentary="hello")
+
+    result = run("post", "create", "-t", "hello", "--no-escape")
+
+    assert result.exit_code == 0
+    client.create_post.assert_called_once_with("hello", visibility="PUBLIC", escape_reserved=False)
+
+
+def test_post_create_no_escape_warns_on_reserved_chars(data_dir, mocker):
+    client = mocker.patch("linkedin_cli.cli.LinkedInClient").return_value
+    client.create_post.return_value = Post(id="urn:li:share:5", commentary="veja (esta parte)")
+
+    result = run("post", "create", "-t", "veja (esta parte)", "--no-escape")
+
+    assert result.exit_code == 0
+    assert "WARNING" in result.stderr
+    client.create_post.assert_called_once_with(
+        "veja (esta parte)", visibility="PUBLIC", escape_reserved=False
+    )
+
+
+def test_post_create_escape_notice(data_dir, mocker):
+    client = mocker.patch("linkedin_cli.cli.LinkedInClient").return_value
+    client.create_post.return_value = Post(id="urn:li:share:6", commentary="x")
+
+    result = run("post", "create", "-t", "veja (esta parte)")
+
+    assert result.exit_code == 0
+    assert "Escaped 2 LinkedIn reserved character(s)" in result.stderr
 
 
 def test_post_create_image(data_dir, tmp_path, mocker):
@@ -206,7 +241,11 @@ def test_post_create_image(data_dir, tmp_path, mocker):
     assert result.exit_code == 0
     client.upload_image.assert_called_once_with(str(image))
     client.create_post.assert_called_once_with(
-        "pic", visibility="PUBLIC", image_urn="urn:li:image:IMG", alt_text="alt"
+        "pic",
+        visibility="PUBLIC",
+        image_urn="urn:li:image:IMG",
+        alt_text="alt",
+        escape_reserved=True,
     )
 
 

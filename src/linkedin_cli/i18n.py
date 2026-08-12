@@ -52,6 +52,8 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "error_missing_upload": "LinkedIn did not return an upload URL for the image.",
         "post_list_requires_scope": "Listing posts requires the restricted scope 'r_member_social', which is not granted. Falling back to local history.",
         "post_requires_content": "Provide the post content with -t/--text or -f/--file.",
+        "post_no_escape_warning": "WARNING: the text contains LinkedIn reserved characters that can silently truncate the post when unescaped. Drop --no-escape so the CLI escapes them (the backslashes are not rendered).",
+        "post_escape_notice": "Escaped {count} LinkedIn reserved character(s) to prevent truncation.",
         "post_show_url": "Post URL: {url}",
     },
     "pt": {
@@ -105,6 +107,8 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "error_missing_upload": "O LinkedIn não retornou uma URL de upload para a imagem.",
         "post_list_requires_scope": "Listar posts exige o escopo restrito 'r_member_social', não concedido. Usando histórico local.",
         "post_requires_content": "Forneça o conteúdo do post com -t/--text ou -f/--file.",
+        "post_no_escape_warning": "AVISO: o texto contém caracteres reservados do LinkedIn que podem truncar silenciosamente o post sem escape. Remova --no-escape para o CLI escapá-los (as barras não são renderizadas).",
+        "post_escape_notice": "{count} caractere(s) reservado(s) do LinkedIn escapado(s) para evitar truncamento.",
         "post_show_url": "URL do post: {url}",
     },
 }

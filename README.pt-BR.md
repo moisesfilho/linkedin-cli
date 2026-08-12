@@ -1,10 +1,10 @@
 # linkedin-cli
 
 <p>
-  <img src="https://img.shields.io/badge/vers%C3%A3o-v0.1.0--alpha-blue" alt="Versão">
+  <img src="https://img.shields.io/badge/vers%C3%A3o-v0.1.1-blue" alt="Versão">
   <img src="https://img.shields.io/badge/licen%C3%A7a-MIT-green" alt="Licença">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue" alt="Python">
-  <img src="https://img.shields.io/badge/testes-128%20passando-brightgreen" alt="Testes">
+  <img src="https://img.shields.io/badge/testes-159%20passando-brightgreen" alt="Testes">
   <img src="https://img.shields.io/badge/cobertura-100%25-brightgreen" alt="Cobertura">
 </p>
 
@@ -22,6 +22,7 @@ CLI para publicar e gerenciar posts no seu perfil pessoal do LinkedIn via termin
 - **Autenticação OAuth 2.0** — fluxo de 3 pernas com servidor de callback local
 - **Interface bilíngue** — mensagens em inglês (padrão) ou português
 - **Logs cíclicos da aplicação** — registra todos os comandos, mantendo apenas o número de dias configurado (padrão 120)
+- **Escape do little text** — escapa automaticamente os caracteres reservados do LinkedIn, evitando o truncamento silencioso pela Posts API
 
 ## Instalação
 
@@ -79,6 +80,12 @@ linkedin post create -t "Veja isso" -i ./imagem.png --alt-text "Descrição da i
 # Restringir visibilidade para conexões
 linkedin post create -t "Olá, rede!" --visibility CONNECTIONS
 ```
+
+> A Posts API renderiza o commentary como *little text*: caracteres reservados
+> sem escape (`\ | { } @ [ ] ( ) < > # * _ ~`) truncam o post silenciosamente. O
+> CLI os escapa automaticamente e as barras não são renderizadas. Use
+> `--no-escape` somente se o texto não contiver nenhum desses caracteres — o CLI
+> avisa se contiver.
 
 ### Exibir / Deletar
 
@@ -150,6 +157,7 @@ linkedin-cli/
 │       ├── cli.py          # Interface CLI (click)
 │       ├── client.py       # Wrapper da API REST do LinkedIn (LinkedInClient)
 │       ├── config.py       # Dataclass Config + env vars
+│       ├── formatter.py    # Escape do little text (escape_little_text)
 │       ├── i18n.py         # Catálogos de mensagens (en/pt) e t()
 │       ├── logging_utils.py # Logger rotativo cíclico (TimedRotatingFileHandler)
 │       └── models.py       # Dataclasses: Post, QueuedPost, MediaAsset, AuthToken
@@ -159,6 +167,7 @@ linkedin-cli/
 │   ├── test_cli.py         # Testes com Click CliRunner
 │   ├── test_client.py
 │   ├── test_config.py
+│   ├── test_formatter.py
 │   ├── test_i18n.py
 │   ├── test_logging_utils.py
 │   └── test_models.py
@@ -174,7 +183,7 @@ linkedin-cli/
 ## Testes
 
 ```bash
-pytest                    # 128 testes
+pytest                    # 159 testes
 pytest --cov=             # Cobertura (100%)
 ```
 
